@@ -37,7 +37,6 @@ def greedy_strategy():
             possible_wants.append(want)
 
     possible_wants.extend([i for i in possible_wants_1 if i not in possible_wants])
-    wants = possible_wants
 
     print("Wanted cards: ", possible_wants)
     print("Cards on table: ", table_values)
@@ -63,14 +62,12 @@ def greedy_strategy():
 
                 card_values[idx1] = want
                 table_values[idx2] = swap
-                wants = [i for i in wants if i != want]
 
             else:
                 print("Nothing to discard, current hand has wanted cards")
                 return
 
         else:
-            wants = [i for i in wants if i != want]
             print(f"Skip {want} since not on table")
 
         print("Cards on table: ", table_values)

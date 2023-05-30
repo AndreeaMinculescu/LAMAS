@@ -10,7 +10,7 @@ class Agent:
 
 def greedy_strategy():
     """ 
-    Find all common numbers (occurence more than once) in all the cards visible 
+    Find all common numbers (most occurances) in all the cards visible 
     to the agent (their cards and the cards on table) and then pick up the same 
     number from the pile on the table otherwise don't do anything. While 
     swapping, make sure you do not swap out any possible wanted cards. If there 
@@ -20,12 +20,15 @@ def greedy_strategy():
 
     # TODO: adjust to andreea's swap code and agent env 
 
-    card_values = [1,2,3,4]
+    card_values = [6,6,11,3]
     table_values = [8,6,12,12,11,6]
 
     all_values = card_values + table_values
-
-    possible_wants_1 = sorted([value for value in all_values if all_values.count(value) > 1], reverse= True)
+    most_freq = {i: all_values.count(i) for i in all_values}
+    most_freq = max(most_freq.values())
+    
+    # most priority given to the cards which occur most frequently
+    possible_wants_1 = sorted([value for value in all_values if all_values.count(value) >= most_freq], reverse= True)
     possible_wants = []
 
     # first give priority to the wants which are in starting hand
@@ -34,6 +37,7 @@ def greedy_strategy():
             possible_wants.append(want)
 
     possible_wants.extend([i for i in possible_wants_1 if i not in possible_wants])
+    wants = possible_wants
 
     print("Wanted cards: ", possible_wants)
     print("Cards on table: ", table_values)
@@ -59,12 +63,14 @@ def greedy_strategy():
 
                 card_values[idx1] = want
                 table_values[idx2] = swap
+                wants = [i for i in wants if i != want]
 
             else:
                 print("Nothing to discard, current hand has wanted cards")
                 return
 
         else:
+            wants = [i for i in wants if i != want]
             print(f"Skip {want} since not on table")
 
         print("Cards on table: ", table_values)

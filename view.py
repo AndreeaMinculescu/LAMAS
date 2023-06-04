@@ -47,16 +47,19 @@ def swap_cards(first_card, card_coord, mouse_pos, play_cards, deck):
             if first_card is None:
                 first_card = card
             else:
-                if card in deck.table_cards:
-                    deck.table_cards[deck.table_cards.index(card)] = first_card
-                else:
-                    play_cards[play_cards.index(card)] = first_card
+                if not ((first_card in deck.table_cards and card in deck.table_cards) or
+                        (first_card in play_cards and card in play_cards)):
+                    temp_table_cards = deck.table_cards[:]
+                    if card in temp_table_cards:
+                        deck.table_cards[deck.table_cards.index(card)] = first_card
+                    else:
+                        play_cards[play_cards.index(card)] = first_card
 
-                if first_card in deck.table_cards:
-                    deck.table_cards[deck.table_cards.index(first_card)] = card
-                else:
-                    play_cards[play_cards.index(first_card)] = card
+                    if first_card in temp_table_cards:
+                        deck.table_cards[deck.table_cards.index(first_card)] = card
+                    else:
+                        play_cards[play_cards.index(first_card)] = card
 
-                first_card = None
+                    first_card = None
 
     return first_card, play_cards

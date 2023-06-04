@@ -4,12 +4,13 @@ from view import Button, display_cards, swap_cards
 from agent import Agent
 
 pygame.init()
+SIZE = (1400, 800)
 window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 run = True
 
 deck = Deck()
 deck.deal_table()
-player = Agent(deck.deal_cards_player(), deck.table_cards)
+player = Agent(deck.deal_cards_player([]), deck.table_cards)
 first_card = None # for swap events
 
 card_back = pygame.image.load('card_design/BACK.png')
@@ -18,7 +19,7 @@ card_back = pygame.transform.scale(card_back, (deck.table_cards[0].image.get_wid
 model_icon = pygame.image.load('card_design/model_icon.png')
 model_icon = pygame.transform.scale(model_icon, (int(model_icon.get_width()/2), model_icon.get_height()/2))
 
-button_turn = Button("Next turn", (100, 100), font=30)
+button_turn = Button("Next turn", (10, card_back.get_height()/2), font=30)
 
 while run:
     pygame.display.set_caption("Kemps!")
@@ -57,13 +58,15 @@ while run:
 
         # check for Kemps
         if player.check_kemps():
-            deck.play_cards.extend(player.cards)
-            if list(set(player.cards) & set(deck.discarded)):
-                print("in discarded")
-            player.cards = deck.deal_cards_player()
+            player.cards = deck.deal_cards_player(player.cards)
+            deck.deal_table()
+            if player.cards:
+                _ = display_cards(window, player.cards, deck)
+            else:
+                run = False
 
         # update game
         pygame.display.update()
 
-
+print("Score: ", player.score)
 pygame.quit()

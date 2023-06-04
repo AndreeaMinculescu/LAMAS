@@ -14,6 +14,7 @@ class Agent:
 
     def check_kemps(self):
         if len(set([card.value for card in self.cards])) == 1:
+            self.score += 1
             return 1
         return 0
 

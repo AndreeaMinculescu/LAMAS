@@ -1,24 +1,27 @@
 import operator
 from collections import Counter
-
+from knowledge_base import KnowledgeBase
 import numpy as np
 import random
+
 class Agent:
   
-    def __init__(self, cards, table):
+    def __init__(self, name, cards, table):
+        self.name = name
         # cards is a list of 4 card objects 
         self.cards = cards
         # table is a list of 6 card objects on the table
         self.table = table
         self.score = 0
-
+        self.kb = None
+        
     def check_kemps(self):
         if len(set([card.value for card in self.cards])) == 1:
             self.score += 1
             return 1
         return 0
 
-    def greedy_strategy(self, verbose=1):
+    def greedy_strategy(self, verbose=False):
         """
         Find all common numbers (most occurances) in all the cards visible
         to the agent (their cards and the cards on table) and then pick up the same
@@ -27,11 +30,6 @@ class Agent:
         are multiple common numbers to discard from agent's hand then choose a random
         one to discard.
         """
-
-        # TODO: adjust to andreea's swap code and agent env
-
-        # card_values = [6,2,11,3]
-        # table_values = [8,7,12,12,11,7]
         card_list = self.cards
         table_list = self.table
 
@@ -48,7 +46,7 @@ class Agent:
         possible_wants = []
 
 
-        # first give priority to the wants which are in starting hand
+        # first give priority to the wanted cards number on table which are also in starting hand
         for want in possible_wants_1:
             if want in card_list:
                 possible_wants.append(want)
@@ -73,18 +71,16 @@ class Agent:
 
                 if discards:
                     swap = random.choice(discards)
-                    # the card number to swap is the var swap
-                    # the card number wanted is the var want
+                    # swap cards from hand to table
                     idx1 = card_list.index(swap)
                     idx2 = table_list.index(want)
-
+                    # TODO: add public announcement here
                     card_list[idx1] = want
                     table_list[idx2] = swap
 
                 else:
                     if verbose:
                         print("Nothing to discard, current hand has wanted cards")
-                        # return
 
             else:
                 if verbose:

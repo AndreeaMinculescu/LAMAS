@@ -22,8 +22,14 @@ class KnowledgeBase:
 
         self.set_knowledge_of_other_cards()
         self.set_knowledge_own_deck()
-
-        # print(self.knowledge)
+    
+    def __str__(self):
+        return f""" 
+                Player: {self.player.name}
+                Other players: {[i.name for i in self.other_players]}
+                Cards: {len(self.all_cards)}
+                Knowledge: {[(i.value, i.suit, [(j.name,l) for j,l in k.items()]) for i, k in self.knowledge.items()]}
+                """
 
     def set_knowledge_of_other_cards(self):
         """

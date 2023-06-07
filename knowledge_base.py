@@ -12,14 +12,16 @@ class KnowledgeBase:
 
         for c in self.all_cards:
             # ASSUMPTION: theres always three players
+            # in the beginning (before looking at your own cards and cards on table) 
+            # nothing is possible
             kb = {
-                    self.player: False,
-                    self.other_players[0]: False,
-                    self.other_players[1]: False
+                    self.player.name: None,
+                    self.other_players[0].name: None,
+                    self.other_players[1].name: None
                  }
 
-            self.knowledge[c] = kb
-
+            self.knowledge[(c.suit, c.value)] = kb
+            
         self.set_knowledge_of_other_cards()
         self.set_knowledge_own_deck()
     
@@ -28,23 +30,37 @@ class KnowledgeBase:
                 Player: {self.player.name}
                 Other players: {[i.name for i in self.other_players]}
                 Cards: {len(self.all_cards)}
-                Knowledge: {[(i.value, i.suit, [(j.name,l) for j,l in k.items()]) for i, k in self.knowledge.items()]}
+                Knowledge: {[(i, [(j, l) for j,l in k.items()]) for i, k in self.knowledge.items()]}
                 """
 
     def set_knowledge_of_other_cards(self):
         """
-        player knows that cards not in their hand and cards 
-        not on the table can be in all other players hands
+        player knows that cards on the table are in no ones hands
+        and cards not on the table and not in players hands are in someone's hand possibly but not his own
         """
-        kb = {
-                self.player: False,
-                self.other_players[0]: True,
-                self.other_players[1]: True
+        # ASSUMPTION: theres always three players
+        kb1 = {
+                self.player.name: False,
+                self.other_players[0].name: True,
+                self.other_players[1].name: True
              }
 
+        kb2 = {
+                self.player.name: False,
+                self.other_players[0].name: False,
+                self.other_players[1].name: False
+             }
+
+        # cards on table in no ones hand
+        for t in self.player.table:    
+            self.knowledge[(t.suit, t.value)] = kb2 
+            print("card on table: ", t)                        
+
+        # cards not on the table or the players hands can be in anyone but the player's hand
+        remainder_cards = list(set([(i.suit,i.value) for i in self.all_cards]) - set([(i.suit,i.value) for i in self.player.cards]) - set([(i.suit,i.value) for i in self.player.table]))
         for card in self.all_cards:
-            if card not in self.player.cards and card not in self.player.table:
-                self.knowledge[card] = kb
+            if (card.suit, card.value) in remainder_cards:
+                self.knowledge[(card.suit, card.value)] = kb1 
 
 
     def set_knowledge_own_deck(self):
@@ -53,25 +69,61 @@ class KnowledgeBase:
         """
         # ASSUMPTION: theres always three players
         kb = {
-                self.player: True,
-                self.other_players[0]: False,
-                self.other_players[1]: False
+                self.player.name: True,
+                self.other_players[0].name: False,
+                self.other_players[1].name: False
              }
 
         for card in self.player.cards:
-            self.knowledge[card] = kb
+            self.knowledge[(card.suit, card.value)] = kb
 
 
     def set_card_knowledge_of_individual(self, card, player):
+        """
+        Change the knowledge of a given card for a given player, equivalent to seeing someone pick up a card
+        """
+        if (card.suit, card.value) not in self.knowledge.keys():
+            s = f"Trying to change knowledge of a {(card.value, card.suit)} which does not exist in KB of " + self.player.name
+            raise Exception(s)
+        # ASSUMPTION: theres always three players
+        kb = {
+                self.player.name: False,
+                self.other_players[0].name: False,
+                self.other_players[1].name: False
+             }
 
-        if not card in self.knowledge:
+        kb[player.name] = True
+        self.knowledge[(card.suit, card.value)] = kb
+
+
+    def get_card_knowledge(self, card):
+        if (card.suit, card.value) not in self.knowledge.keys():
             s = "Trying to change knowledge of a card which does not exist in KB of " + self.player.name
             raise Exception(s)
 
+        for c, knowledge in self.knowledge.items():
+            if c == (card.suit, card.value):
+                return knowledge 
+
+    def set_discard_knowledge(self, card, player):
+        """
+        Change the knowledge of a given card for a given player, equivalent to seeing someone discard a card
+        """
+        if (card.suit, card.value) not in self.knowledge.keys():
+            s = "Trying to change knowledge of a card which does not exist in KB of " + self.player.name
+            raise Exception(s)
+
+        kb = self.knowledge[(card.suit, card.value)]
+
+        # discarded cards go on table so no-one has them
         kb = {
-                self.player: False,
-                self.other_players[0]: False,
-                self.other_players[1]: False
+                self.player.name: False,
+                self.other_players[0].name: False,
+                self.other_players[1].name: False
              }
-        kb[player] = True
-        self.knowledge[card] = kb
+
+        self.knowledge[(card.suit, card.value)] = kb 
+
+
+
+

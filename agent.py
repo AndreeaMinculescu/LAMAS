@@ -1,6 +1,7 @@
 import operator
 from collections import Counter
 from knowledge_base import KnowledgeBase
+from announcement import PublicAnnouncement, AnnouncementType
 import numpy as np
 import random
 
@@ -32,6 +33,7 @@ class Agent:
         """
         card_list = self.cards
         table_list = self.table
+        announcements = []
 
         card_values = [card.value for card in self.cards]
         table_values = [card.value for card in self.table]
@@ -74,9 +76,18 @@ class Agent:
                     # swap cards from hand to table
                     idx1 = card_list.index(swap)
                     idx2 = table_list.index(want)
-                    # TODO: add public announcement here
                     card_list[idx1] = want
                     table_list[idx2] = swap
+
+                    # make pulic announcement
+                    announcements.append(PublicAnnouncement(self, want, AnnouncementType.PICKED))
+                    announcements.append(PublicAnnouncement(self, swap, AnnouncementType.DISCARDED))
+                    
+                    # update own knowledge base
+                    print(f"before updating {self.name} kb: {self.kb}")                                                          
+                    self.kb.set_card_knowledge_of_individual(want, self)
+                    self.kb.set_discard_knowledge(swap, self)
+                    print(f"after updating {self.name} kb: {self.kb}")
 
                 else:
                     if verbose:
@@ -95,3 +106,23 @@ class Agent:
         print("End of round - cards in hand: ", [(card.value, card.suit) for card in card_list])
         self.cards = card_list
         self.table = table_list
+
+        return announcements
+
+
+    def recieve_announcement(self, announcement):
+
+        t = announcement.type
+        sender = announcement.sender
+        card = announcement.card
+        if t == AnnouncementType.PICKED:
+            # sender picked the card so no one else has it
+            self.kb.set_card_knowledge_of_individual(card, sender)
+
+        if t == AnnouncementType.DISCARDED:
+            # sender discarded the card so the sender does not have it
+            # if card on table then no one has it
+            self.kb.set_discard_knowledge(card, sender)
+        
+    def check_strategies(players):
+        pass

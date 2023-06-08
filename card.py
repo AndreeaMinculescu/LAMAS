@@ -24,11 +24,13 @@ class Card:
 class Deck:
     def __init__(self):
         self.cards = []
+        self.whole_deck = []
         self.discarded = set()
         self.table_cards = []
         for suit in Suits:
             for value in range(1, 14):
                 self.cards.append(Card(suit, value))
+                self.whole_deck.append(Card(suit, value))
         random.shuffle(self.cards)
 
     def deal_table(self):

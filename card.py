@@ -24,13 +24,12 @@ class Card:
 class Deck:
     def __init__(self):
         self.cards = []
-        self.whole_deck = []
         self.discarded = set()
         self.table_cards = []
         for suit in Suits:
             for value in range(1, 14):
                 self.cards.append(Card(suit, value))
-                self.whole_deck.append(Card(suit, value))
+        self.whole_deck = self.cards[:]
         random.shuffle(self.cards)
 
     def deal_table(self):
@@ -38,13 +37,12 @@ class Deck:
         if len(self.cards) >= 6:
             self.table_cards = [self.cards.pop() for _ in range(6)]
         else:
-            print("in else deal")
             self.cards.extend(self.discarded)
             random.shuffle(self.cards)
             self.table_cards = [self.cards.pop() for _ in range(6)]
             self.discarded = set()
 
-    def deal_cards_player(self, play_cards):
+    def deal_cards_player(self):
         if len(self.cards) + len(self.discarded) >= 4:
             if len(self.cards) >= 4:
                 return [self.cards.pop() for _ in range(4)]

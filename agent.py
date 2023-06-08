@@ -35,8 +35,7 @@ class Agent:
         table_list = self.table
         announcements = []
 
-        card_values = [card.value for card in self.cards]
-        table_values = [card.value for card in self.table]
+        card_value = [card.value for card in self.cards]
 
         all_cards = card_list + table_list
         all_values = [card.value for card in all_cards]
@@ -47,13 +46,13 @@ class Agent:
         possible_wants_1 = sorted([card for card in all_cards if all_values.count(card.value) >= most_freq], key=operator.attrgetter('value'), reverse= True)
         possible_wants = []
 
-
         # first give priority to the wanted cards number on table which are also in starting hand
         for want in possible_wants_1:
             if want in card_list:
                 possible_wants.append(want)
 
         possible_wants.extend([i for i in possible_wants_1 if i not in possible_wants])
+        possible_wants = sorted([card for card in possible_wants], key=operator.attrgetter('value'), reverse=True)
 
         print("Wanted cards: ", [(card.value, card.suit) for card in possible_wants])
         print("Cards on table: ", [(card.value, card.suit) for card in table_list])
@@ -66,7 +65,8 @@ class Agent:
 
             if want in table_list:
 
-                discards = [card for card in card_list if card_values.count(card.value) == 1 and card not in possible_wants]
+                discards = [card for card in card_list if card_value.count(card.value) < most_freq
+                            and card not in possible_wants]
 
                 if want in card_list:
                     discards = [card for card in card_list if card != want and card not in possible_wants]
@@ -79,7 +79,7 @@ class Agent:
                     card_list[idx1] = want
                     table_list[idx2] = swap
 
-                    # make pulic announcement
+                    # make public announcement
                     announcements.append(PublicAnnouncement(self, want, AnnouncementType.PICKED))
                     announcements.append(PublicAnnouncement(self, swap, AnnouncementType.DISCARDED))
                     

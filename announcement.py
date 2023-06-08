@@ -6,7 +6,7 @@ class AnnouncementType(Enum):
 
 class PublicAnnouncement:
 
-    def __init__(self, sender, card, announcement_type:AnnouncementType):
+    def __init__(self, sender, card, announcement_type: AnnouncementType):
         self.card = card
         self.sender = sender
         self.type = announcement_type

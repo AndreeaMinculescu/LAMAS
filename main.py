@@ -5,12 +5,12 @@ from agent import Agent
 
 pygame.init()
 SIZE = (1400, 800)
-window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+window = pygame.display.set_mode(SIZE)
 run = True
 
 deck = Deck()
 deck.deal_table()
-player = Agent(deck.deal_cards_player([]), deck.table_cards)
+player = Agent("user", deck.deal_cards_player(), deck.table_cards)
 first_card = None # for swap events
 
 card_back = pygame.image.load('card_design/BACK.png')
@@ -58,7 +58,7 @@ while run:
 
         # check for Kemps
         if player.check_kemps():
-            player.cards = deck.deal_cards_player(player.cards)
+            player.cards = deck.deal_cards_player()
             deck.deal_table()
             if player.cards:
                 _ = display_cards(window, player.cards, deck)

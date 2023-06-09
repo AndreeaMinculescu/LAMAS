@@ -13,7 +13,7 @@ class KnowledgeBase:
         self.knowledge = {}
         self.game_model = None
         self.discard_cards = []
-
+        
         for c in self.all_cards:
             # ASSUMPTION: theres always three players
             # in the beginning (before looking at your own cards and cards on table) 
@@ -79,7 +79,7 @@ class KnowledgeBase:
                 self.other_players[0].name: False,
                 self.other_players[1].name: False
              }
-
+        # print("discards: ", [(card.value, card.suit) for card in discards])
         for card in discards:
             # no one has cards which are in discard pile
             self.knowledge[(card.suit, card.value)] = kb
@@ -115,6 +115,7 @@ class KnowledgeBase:
 
         kb[player.name] = True
         self.knowledge[(card.suit, card.value)] = kb
+        
 
     def set_discard_knowledge(self, card, player):
         """
@@ -134,6 +135,7 @@ class KnowledgeBase:
              }
 
         self.knowledge[(card.suit, card.value)] = kb 
+
 
     def check_players_have_number(self, value):
         """

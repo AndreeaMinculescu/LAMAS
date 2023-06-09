@@ -3,6 +3,7 @@ from enum import Enum
 class AnnouncementType(Enum):
     PICKED = 0
     DISCARDED = 1
+    KEMPS = 2
 
 class PublicAnnouncement:
 

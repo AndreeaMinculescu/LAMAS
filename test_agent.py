@@ -1,7 +1,7 @@
 from agent import Agent
 from card import Deck
 from knowledge_base import KnowledgeBase
-from announcement import PublicAnnouncement
+from announcement import PublicAnnouncement, AnnouncementType
 from statistics import mean
 
 def make_announcements(announcements, players):
@@ -34,7 +34,7 @@ p2_score = []
 p3_score = []
 kb_greedy = False
 
-for _ in range(10):
+for _ in range(1):
 
     player1, player2, player3, deck = init_game()
     turn = 0
@@ -60,16 +60,17 @@ for _ in range(10):
 
         # update points
         if player.check_kemps():
-            print("Kemps!")
+            make_announcements([PublicAnnouncement(player, player.cards[0], AnnouncementType.KEMPS)], [player1, player2, player3])
+            # print("Kemps!")
             if cards := deck.deal_cards_player():
                 # give new cards to player
                 player.kb.set_knowledge_own_deck()
                 player.cards = cards
             else:
                break
-        print([(card.value, card.suit) for card in deck.discarded])
-        # TODO: check when there are no more cards to deal
-        # since if theres no more cards, the KB has to be reset
+
+        print("discard pile: ", [(card.value, card.suit) for card in deck.discarded])
+
         deck.deal_table()
 
         # remember which cards have been discarded
@@ -85,13 +86,15 @@ for _ in range(10):
         player2.kb.set_knowledge_of_other_cards()
         player3.kb.set_knowledge_of_other_cards()
 
+        print("discard pile: ", [(card.value, card.suit) for card in deck.discarded])
+
         turn += 1
 
     p1_score.append(player1.score)
     p2_score.append(player2.score)
     p3_score.append(player3.score)
 
-print("Player 1 score: ", mean(p1_score))
-print("Player 2 score: ", mean(p2_score))
-print("Player 3 score: ", mean(p3_score))
+print("Player 1 score: ", sum(p1_score))
+print("Player 2 score: ", sum(p2_score))
+print("Player 3 score: ", sum(p3_score))
     

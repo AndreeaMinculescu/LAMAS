@@ -15,6 +15,7 @@ class Agent:
         self.table = table
         self.score = 0
         self.kb = None
+        self.do_not_collect = set()
         
     def check_kemps(self):
         if len(set([card.value for card in self.cards])) == 1:
@@ -62,12 +63,19 @@ class Agent:
         # if strategy kb based remove all cards in possible wants which agent thinks all other players might have
         if kb_based:
             possible_wants_values = sorted(list(set([card.value for card in possible_wants])), reverse=True)
-
+            print("No collect list: ", list(self.do_not_collect))
             for value in possible_wants_values:
                 print("Looking at value: ", value)
                 # print(self.kb)
-                if self.kb.check_players_have_number(value) :
-                    print("Both have value so removing ", value )
+                
+                if value in list(self.do_not_collect):
+                    print("number in do not collect: ", value)
+                    possible_wants = sorted([card for card in possible_wants if card.value != value], key=operator.attrgetter('value'), reverse=True)
+                    print("New wanted cards: ", [(card.value, card.suit) for card in possible_wants])
+                    continue
+
+                if self.kb.check_players_have_number(value): 
+                    print("Both have value so removing ", value)                        
                     possible_wants = sorted([card for card in possible_wants if card.value != value], key=operator.attrgetter('value'), reverse=True)
                     print("New wanted cards: ", [(card.value, card.suit) for card in possible_wants])
 
@@ -77,8 +85,7 @@ class Agent:
 
             if want in table_list:
 
-                discards = [card for card in card_list if card_value.count(card.value) < most_freq
-                            and card not in possible_wants]
+                discards = [card for card in card_list if card not in possible_wants]
 
                 if want in card_list:
                     discards = [card for card in card_list if card != want and card not in possible_wants]
@@ -129,12 +136,17 @@ class Agent:
         card = announcement.card
         if t == AnnouncementType.PICKED:
             # sender picked the card so no one else has it
+            self.do_not_collect.add(card.value)
             self.kb.set_card_knowledge_of_individual(card, sender)
 
         if t == AnnouncementType.DISCARDED:
             # sender discarded the card so the sender does not have it
             # if card on table then no one has it
+            self.do_not_collect.discard(card.value)
             self.kb.set_discard_knowledge(card, sender)
+
+        if t == AnnouncementType.KEMPS:
+            self.do_not_collect.discard(card.value)
         
     def check_strategies(players):
         pass

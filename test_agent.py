@@ -67,7 +67,7 @@ for _ in range(10):
                 player.cards = cards
             else:
                break
-
+        print([(card.value, card.suit) for card in deck.discarded])
         # TODO: check when there are no more cards to deal
         # since if theres no more cards, the KB has to be reset
         deck.deal_table()
@@ -77,13 +77,13 @@ for _ in range(10):
         player2.kb.update_discard_pile(list(deck.discarded))
         player3.kb.update_discard_pile(list(deck.discarded))
 
-        player1.kb.set_knowledge_of_other_cards()
-        player2.kb.set_knowledge_of_other_cards()
-        player3.kb.set_knowledge_of_other_cards()
-
         player1.table = deck.table_cards
         player2.table = deck.table_cards
         player3.table = deck.table_cards
+
+        player1.kb.set_knowledge_of_other_cards()
+        player2.kb.set_knowledge_of_other_cards()
+        player3.kb.set_knowledge_of_other_cards()
 
         turn += 1
 

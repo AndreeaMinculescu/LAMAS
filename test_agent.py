@@ -34,8 +34,8 @@ p2_score = []
 p3_score = []
 kb_greedy = False
 
-for _ in range(1):
-
+for _ in range(2):
+    print("\n############### NEW GAME ####################")
     player1, player2, player3, deck = init_game()
     turn = 0
 
@@ -55,6 +55,7 @@ for _ in range(1):
             print("player 3 turn")
             player = player3
 
+        print("discard pile: ", [(card.value, card.suit) for card in list(deck.discarded)])
         announcements = player.greedy_strategy(verbose=False, kb_based=kb_greedy)
         make_announcements(announcements, [player1, player2, player3])
 
@@ -69,7 +70,7 @@ for _ in range(1):
             else:
                break
 
-        print("discard pile: ", [(card.value, card.suit) for card in list(deck.discarded)])
+        
 
         deck.deal_table()
 
@@ -86,7 +87,7 @@ for _ in range(1):
         player2.kb.set_knowledge_of_other_cards()
         player3.kb.set_knowledge_of_other_cards()
 
-        print("discard pile: ", [(card.value, card.suit) for card in list(deck.discarded)])
+        # print("discard pile: ", [(card.value, card.suit) for card in list(deck.discarded)])
 
         turn += 1
 

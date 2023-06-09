@@ -146,7 +146,7 @@ class Agent:
             self.kb.set_discard_knowledge(card, sender)
 
         if t == AnnouncementType.KEMPS:
-            self.do_not_collect.discard(card.value)
+            self.do_not_collect.add(card.value)
         
     def check_strategies(players):
         pass

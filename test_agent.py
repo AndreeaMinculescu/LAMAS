@@ -69,7 +69,7 @@ for _ in range(1):
             else:
                break
 
-        print("discard pile: ", [(card.value, card.suit) for card in deck.discarded])
+        print("discard pile: ", [(card.value, card.suit) for card in list(deck.discarded)])
 
         deck.deal_table()
 
@@ -86,7 +86,7 @@ for _ in range(1):
         player2.kb.set_knowledge_of_other_cards()
         player3.kb.set_knowledge_of_other_cards()
 
-        print("discard pile: ", [(card.value, card.suit) for card in deck.discarded])
+        print("discard pile: ", [(card.value, card.suit) for card in list(deck.discarded)])
 
         turn += 1
 

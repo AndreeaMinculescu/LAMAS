@@ -12,7 +12,7 @@ class KnowledgeBase:
         self.all_cards = all_cards
         self.knowledge = {}
         self.game_model = None
-        self.discard_cards = []
+        self.discard_cards = set()
         
         for c in self.all_cards:
             # ASSUMPTION: theres always three players
@@ -74,6 +74,7 @@ class KnowledgeBase:
         """
         Update knowledge about what does in the discarded pile, equivalent of seeing the table being reset
         """
+
         kb = {
                 self.player.name: False,
                 self.other_players[0].name: False,
@@ -83,7 +84,7 @@ class KnowledgeBase:
         for card in discards:
             # no one has cards which are in discard pile
             self.knowledge[(card.suit, card.value)] = kb
-            self.discard_cards.append((card.suit, card.value))
+            self.discard_cards.add((card.suit, card.value))
 
     def set_knowledge_own_deck(self):
         """
@@ -147,9 +148,7 @@ class KnowledgeBase:
         for c, kb in self.knowledge.items():
             if c[1] == value:
                 # ... if another player has value
-                print(c)
-                print(kb)
-
+                print(f"{c}: {kb}")
                 p1 = kb[self.other_players[0].name]
                 p2 = kb[self.other_players[1].name]
 

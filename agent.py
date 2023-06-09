@@ -22,7 +22,7 @@ class Agent:
             return 1
         return 0
 
-    def greedy_strategy(self, verbose=False):
+    def greedy_strategy(self, verbose=False, kb_based=False):
         """
         Find all common numbers (most occurances) in all the cards visible
         to the agent (their cards and the cards on table) and then pick up the same
@@ -59,6 +59,18 @@ class Agent:
         print("Cards in hand: ", [(card.value, card.suit) for card in card_list])
         print("------------------------------------")
 
+        # if strategy kb based remove all cards in possible wants which agent thinks all other players might have
+        if kb_based:
+            possible_wants_values = sorted(list(set([card.value for card in possible_wants])), reverse=True)
+
+            for value in possible_wants_values:
+                print("Looking at value: ", value)
+                # print(self.kb)
+                if self.kb.check_players_have_number(value) :
+                    print("Both have value so removing ", value )
+                    possible_wants = sorted([card for card in possible_wants if card.value != value], key=operator.attrgetter('value'), reverse=True)
+                    print("New wanted cards: ", [(card.value, card.suit) for card in possible_wants])
+
         for want in possible_wants:
             if verbose:
                 print("Current wanted card: ", (want.value, want.suit))
@@ -84,10 +96,10 @@ class Agent:
                     announcements.append(PublicAnnouncement(self, swap, AnnouncementType.DISCARDED))
                     
                     # update own knowledge base
-                    print(f"before updating {self.name} kb: {self.kb}")                                                          
+                    # print(f"before updating {self.name} kb: {self.kb}")                                                          
                     self.kb.set_card_knowledge_of_individual(want, self)
                     self.kb.set_discard_knowledge(swap, self)
-                    print(f"after updating {self.name} kb: {self.kb}")
+                    # print(f"after updating {self.name} kb: {self.kb}")
 
                 else:
                     if verbose:

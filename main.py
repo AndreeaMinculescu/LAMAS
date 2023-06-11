@@ -42,11 +42,16 @@ end_game = False
 while not end_game:
     pygame.display.set_caption("Kemps!")
 
-    deck.deal_table()
+    if turn % 3 == 0:
+        deck.deal_table()
 
     user.kb.update_discard_pile(list(deck.discarded))
     player2.kb.update_discard_pile(list(deck.discarded))
     player3.kb.update_discard_pile(list(deck.discarded))
+
+    user.table = deck.table_cards
+    player2.table = deck.table_cards
+    player3.table = deck.table_cards
 
     user.kb.set_knowledge_of_other_cards()
     player2.kb.set_knowledge_of_other_cards()

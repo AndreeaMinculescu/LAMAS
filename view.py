@@ -70,8 +70,11 @@ def swap_cards(first_card, card_coord, mouse_pos, play_cards, deck):
     else:
         return first_card, play_cards, None, None
 
+
 def display_text(window, text):
+    window.fill((15, 0, 169), ((window.get_width() // 4, window.get_height() // 2.5, window.get_width()//2, window.get_height()//4)))
     font = pygame.font.Font('freesansbold.ttf', 26)
     lines = text.splitlines()
     for i, l in enumerate(lines):
+
         window.blit(font.render(l, True, (0, 0, 128), (255, 255, 255)), (window.get_width() // 4, window.get_height() // 2.5 + 26 * i))

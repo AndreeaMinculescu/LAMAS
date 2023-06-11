@@ -13,4 +13,14 @@ class PublicAnnouncement:
         self.type = announcement_type
 
         print(f"Public Announcement: {self.sender.name} has {self.type.name} {(card.value, card.suit)}")
-        
+
+
+def make_announcements(announcements, players):
+    for announcement in announcements:
+        sender = announcement.sender
+        for player in players:
+            if player.name != sender.name:
+                print(f"KB of {player.name} before announcement({announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}): {player.kb}")
+                print(f"Player {player.name} recieved announcement: {announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}")
+                player.recieve_announcement(announcement)
+                print(f"KB of {player.name} after announcement({announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}): {player.kb}")

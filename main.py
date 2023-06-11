@@ -3,8 +3,9 @@ from card import *
 from view import Button, display_cards, swap_cards, display_text
 from agent import Agent
 from knowledge_base import KnowledgeBase
-from announcement import PublicAnnouncement, AnnouncementType
+from announcement import PublicAnnouncement, AnnouncementType, make_announcements
 import time
+
 
 def init_game(deck):
     user = Agent("user", deck.deal_cards_player(), deck.table_cards)
@@ -16,23 +17,12 @@ def init_game(deck):
     player3.kb = KnowledgeBase(player3, [user, player2], deck.whole_deck)
     return user, player2, player3, deck
 
-def make_announcements(announcements, players):
-    for announcement in announcements:
-        sender = announcement.sender
-        for player in players:
-            if player.name != sender.name:
-                print(f"KB of {player.name} before announcement({announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}): {player.kb}")
-                print(f"Player {player.name} recieved announcement: {announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}")
-                player.recieve_announcement(announcement)
-                print(f"KB of {player.name} after announcement({announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}): {player.kb}")
-
 
 pygame.init()
 SIZE = (1400, 800)
 window = pygame.display.set_mode(SIZE)
 
 deck = Deck()
-# deck.deal_table()
 first_card = None # for swap events
 
 card_back = pygame.image.load('card_design/BACK.png')
@@ -43,9 +33,6 @@ model_icon = pygame.transform.scale(model_icon, (int(model_icon.get_width()/2), 
 
 button_turn = Button("Next turn", (10, card_back.get_height()/2), font=30)
 
-p1_score = []
-p2_score = []
-p3_score = []
 kb_greedy = False
 
 user, player2, player3, deck = init_game(deck)
@@ -55,20 +42,17 @@ end_game = False
 while not end_game:
     pygame.display.set_caption("Kemps!")
 
+    deck.deal_table()
+
     user.kb.update_discard_pile(list(deck.discarded))
     player2.kb.update_discard_pile(list(deck.discarded))
     player3.kb.update_discard_pile(list(deck.discarded))
-
-    user.table = deck.table_cards
-    player2.table = deck.table_cards
-    player3.table = deck.table_cards
 
     user.kb.set_knowledge_of_other_cards()
     player2.kb.set_knowledge_of_other_cards()
     player3.kb.set_knowledge_of_other_cards()
 
     if turn % 3 == 0:
-        deck.deal_table()
         run = True
         announcements = []
         while run:
@@ -88,7 +72,6 @@ while not end_game:
 
                 # handle next turn
                 if button_turn.click(event):
-                    deck.deal_table()
                     run = False
                 button_turn.show(window)
 
@@ -110,6 +93,7 @@ while not end_game:
                 first_card, user.cards, first_swap, second_swap = swap_cards(first_card, card_coord, pos, user.cards, deck)
                 _ = display_cards(window, user.cards, deck)
 
+                # create public announcements for swap events (to update agents' kbs)
                 if first_swap:
                     if first_swap in user.cards:
                         announcements.append(PublicAnnouncement(user, first_swap, AnnouncementType.PICKED))
@@ -118,23 +102,24 @@ while not end_game:
                         announcements.append(PublicAnnouncement(user, second_swap, AnnouncementType.PICKED))
                         announcements.append(PublicAnnouncement(user, first_swap, AnnouncementType.DISCARDED))
 
-                make_announcements(announcements, [user, player2, player3])
-
-                # check for Kemps
+                # check for Kemps and create public announcement
                 if user.check_kemps():
-                    make_announcements([PublicAnnouncement(user, user.cards[0], AnnouncementType.KEMPS)],
-                                       [user, player2, player3])
+                    announcements.append(PublicAnnouncement(user, user.cards[0], AnnouncementType.KEMPS))
                     user.cards = deck.deal_cards_player()
-                    deck.deal_table()
                     if user.cards:
                         _ = display_cards(window, user.cards, deck)
                     else:
-                        run = False
+                        end_game = True
+                    run = False
+
+                # update all agent kbs
+                make_announcements(announcements, [user, player2, player3])
 
                 # update game
                 display_text(window, "Your turn")
                 pygame.display.update()
     else:
+        # decide which agent's turn it is
         if turn % 3 == 1:
             kb_greedy = True
             print("player 2 turn")
@@ -146,48 +131,61 @@ while not end_game:
             text = "Model 2 turn \n"
             player = player3
 
-        deck.deal_table()
+        # update table card view
+        player.table = deck.table_cards
         _ = display_cards(window, player.cards, deck, only_table=True)
+        display_text(window, text)
+        pygame.display.update()
+        time.sleep(3)
 
+        print("Cards before: ")
+        print([(card.value, card.lookup[card.suit]) for card in player.cards])
+        print([(card.value, card.lookup[card.suit]) for card in deck.table_cards])
+
+        # run greedy strategy
         announcements = player.greedy_strategy(verbose=False, kb_based=kb_greedy)
-        make_announcements(announcements, [user, player2, player3])
-        # update points
+
+        # check Kemps and create public announcement
         if player.check_kemps():
-            make_announcements([PublicAnnouncement(player, player.cards[0], AnnouncementType.KEMPS)],
-                               [user, player2, player3])
+            announcements.append(PublicAnnouncement(player, player.cards[0], AnnouncementType.KEMPS))
             # print("Kemps!")
             if cards := deck.deal_cards_player():
                 # give new cards to player
                 player.kb.set_knowledge_own_deck()
                 player.cards = cards
             else:
-                break
+                end_game = True
 
-        print("discard pile: ", [(card.value, card.suit) for card in deck.discarded])
+        # update all kbs
+        make_announcements(announcements, [user, player2, player3])
 
-        # remember which cards have been discarded
-        # player1.kb.update_discard_pile(list(deck.discarded))
+        # update table card view
 
         _ = display_cards(window, player.cards, deck, only_table=True)
 
+        # display text to user regarding agents' actions (for readibility)
         if announcements:
             for ann in announcements:
+                print(ann.type)
                 if ann.type == AnnouncementType.PICKED:
                     text += f"Model picked card <{ann.card.value}, {ann.card.suit.name}> \n"
                 elif ann.type == AnnouncementType.DISCARDED:
                     text += f"Model discarded card <{ann.card.value}, {ann.card.suit.name}> \n"
                 else:
-                    text += "Kemps! \n"
+                    text += f"Kemps with number {ann.card.value}! \n"
         else:
             text += "No moves made. \n"
-
         display_text(window, text)
         pygame.display.update()
 
-        print("discard pile: ", [(card.value, card.suit) for card in deck.discarded])
+        print("Cards after: ")
+        print([(card.value, card.lookup[card.suit]) for card in player.cards])
+        print([(card.value, card.lookup[card.suit]) for card in deck.table_cards])
+
+        # give user time to process the displayed game information
         time.sleep(5)
 
-
+    # start next turn
     turn += 1
 
 print("User score: ", user.score)

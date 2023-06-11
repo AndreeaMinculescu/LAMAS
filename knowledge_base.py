@@ -68,7 +68,7 @@ class KnowledgeBase:
         remainder_cards = list(set([(i.suit,i.value) for i in self.all_cards]) - set([(i.suit,i.value) for i in self.player.cards]) - set([(i.suit,i.value) for i in self.player.table]) - set(self.discard_cards))
         for card in self.all_cards:
             if (card.suit, card.value) in remainder_cards:
-                self.knowledge[(card.suit, card.value)] = kb1 
+                self.knowledge[(card.suit, card.value)] = kb1
 
     def update_discard_pile(self, discards):
         """

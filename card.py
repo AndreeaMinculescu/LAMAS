@@ -16,9 +16,15 @@ class Card:
         self.value = value
         self.image = pygame.image.load('card_design/' + self.suit.name + '-' + str(self.value) + '.svg')
         self.image = pygame.transform.scale(self.image, (int(self.image.get_width()*0.75), int(self.image.get_height()*0.75)))
+        self.lookup = {
+            Suits.CLUB: '♣',
+            Suits.SPADE: '♠',
+            Suits.HEART: '♥',
+            Suits.DIAMOND: '♦'
+        }
 
     def __str__(self):
-        return f'{self.suit}, {self.value}'
+        return f'<{self.value}{self.lookup[self.suit]}>'
 
 
 class Deck:

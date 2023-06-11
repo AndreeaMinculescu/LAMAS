@@ -1,4 +1,5 @@
 import pygame
+import ptext
 
 class Button:
     """Create a button"""
@@ -25,22 +26,24 @@ class Button:
         return False
 
 
-def display_cards(window, play_cards, deck):
+def display_cards(window, play_cards, deck, only_table=False):
     card_coord = []
     w, h = window.get_width() / 2 - 4 * play_cards[0].image.get_width(), 0
     for idx, card in enumerate(deck.table_cards):
         window.blit(card.image, (w := w + card.image.get_width() + 15, h))
         card_coord.append((card, (w, h)))
 
-    w, h = window.get_width() / 2 - 3 * play_cards[0].image.get_width(), window.get_height() - 1.5 * play_cards[
-        0].image.get_width()
-    for idx, card in enumerate(play_cards):
-        window.blit(card.image, (w := w + card.image.get_width() + 15, h))
-        card_coord.append((card, (w, h)))
+    if not only_table:
+        w, h = window.get_width() / 2 - 3 * play_cards[0].image.get_width(), window.get_height() - 1.5 * play_cards[
+            0].image.get_width()
+        for idx, card in enumerate(play_cards):
+            window.blit(card.image, (w := w + card.image.get_width() + 15, h))
+            card_coord.append((card, (w, h)))
     return card_coord
 
 
 def swap_cards(first_card, card_coord, mouse_pos, play_cards, deck):
+    flag = False
     for card, coord in card_coord:
         rect_coord = pygame.Rect(coord[0], coord[1], card.image.get_width(), card.image.get_height())
         if mouse_pos is not None and rect_coord.collidepoint(mouse_pos):
@@ -59,7 +62,16 @@ def swap_cards(first_card, card_coord, mouse_pos, play_cards, deck):
                         deck.table_cards[deck.table_cards.index(first_card)] = card
                     else:
                         play_cards[play_cards.index(first_card)] = card
+                    flag = True
+                    swap = card
 
-                    first_card = None
+    if flag:
+        return None, play_cards, first_card, swap
+    else:
+        return first_card, play_cards, None, None
 
-    return first_card, play_cards
+def display_text(window, text):
+    font = pygame.font.Font('freesansbold.ttf', 26)
+    lines = text.splitlines()
+    for i, l in enumerate(lines):
+        window.blit(font.render(l, True, (0, 0, 128), (255, 255, 255)), (window.get_width() // 4, window.get_height() // 2.5 + 26 * i))

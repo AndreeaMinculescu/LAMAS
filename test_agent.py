@@ -9,10 +9,10 @@ def make_announcements(announcements, players):
         sender = announcement.sender
         for player in players:
             if player.name != sender.name:
-                # print(f"KB of {player.name} before announcement({announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}): {player.kb}")
-                # print(f"Player {player.name} recieved announcement: {announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}")
+                print(f"KB of {player.name} before announcement({announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}): {player.kb}")
+                print(f"Player {player.name} recieved announcement: {announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}")
                 player.recieve_announcement(announcement)
-                # print(f"KB of {player.name} after announcement({announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}): {player.kb}")
+                print(f"KB of {player.name} after announcement({announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}): {player.kb}")
 
 
 def init_game():
@@ -34,7 +34,7 @@ p2_score = []
 p3_score = []
 kb_greedy = False
 
-for _ in range(2):
+for _ in range(1):
     print("\n############### NEW GAME ####################")
     player1, player2, player3, deck = init_game()
     turn = 0

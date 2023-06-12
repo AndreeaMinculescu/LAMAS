@@ -4,6 +4,7 @@ from knowledge_base import KnowledgeBase
 from announcement import PublicAnnouncement, AnnouncementType
 from statistics import mean
 
+############ Testing environment, not part of the main pipeline #####################
 def make_announcements(announcements, players):
     for announcement in announcements:
         sender = announcement.sender

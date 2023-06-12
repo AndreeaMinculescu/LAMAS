@@ -202,6 +202,4 @@ print("User score: ", user.score)
 print("Model 2 score: ", player2.score)
 print("Model 3 score: ", player3.score)
 
-print(player2.kb)
-print(player3.kb)
 pygame.quit()

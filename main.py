@@ -57,6 +57,9 @@ while not end_game:
     # every three turn reset cards on table
     if turn % 3 == 0:
         deck.deal_table()
+        user.kb.set_knowledge_of_other_cards()
+        player2.kb.set_knowledge_of_other_cards()
+        player3.kb.set_knowledge_of_other_cards()
 
     # update knowledge base of players given new set of cards and list of discarded cards
     user.kb.update_discard_pile(list(deck.discarded))
@@ -66,10 +69,6 @@ while not end_game:
     user.table = deck.table_cards
     player2.table = deck.table_cards
     player3.table = deck.table_cards
-
-    user.kb.set_knowledge_of_other_cards()
-    player2.kb.set_knowledge_of_other_cards()
-    player3.kb.set_knowledge_of_other_cards()
 
     announcements = []
 

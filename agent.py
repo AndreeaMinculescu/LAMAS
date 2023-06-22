@@ -3,6 +3,7 @@ from collections import Counter
 from announcement import PublicAnnouncement, AnnouncementType
 import random
 
+
 class Agent:
     """ Class that stores an agent's knowledge (the user is also an agent) """
   
@@ -44,6 +45,14 @@ class Agent:
         :param kb_based: if True, then the agent takes advantage of the information in the knowledge base
         :return: a list of announcements (i.e. agent moves)
         """
+
+        def new_print(*val):
+            nonlocal verbose
+            if verbose:
+                print(*val)
+
+        print = new_print
+
         card_list = self.cards
         table_list = self.table
         announcements = []
@@ -55,16 +64,8 @@ class Agent:
         most_freq = max(most_freq.values())
 
         # most priority given to the cards which occur most frequently
-        possible_wants_1 = sorted([card for card in all_cards if all_values.count(card.value) >= most_freq], key=operator.attrgetter('value'), reverse= True)
-        possible_wants = []
-
-        # first give priority to the wanted cards number on table which are also in starting hand
-        for want in possible_wants_1:
-            if want in card_list:
-                possible_wants.append(want)
-
-        possible_wants.extend([i for i in possible_wants_1 if i not in possible_wants])
-        possible_wants = sorted([card for card in possible_wants], key=operator.attrgetter('value'), reverse=True)
+        possible_wants = sorted([card for card in all_cards if all_values.count(card.value) >= most_freq],
+                                  key=operator.attrgetter('value'), reverse=True)
 
         print("Wanted cards: ", [(card.value, card.suit) for card in possible_wants])
         print("Cards on table: ", [(card.value, card.suit) for card in table_list])
@@ -75,6 +76,7 @@ class Agent:
         if kb_based:
             possible_wants_values = sorted(list(set([card.value for card in possible_wants])), reverse=True)
             print("No collect list: ", list(self.do_not_collect))
+
             for value in possible_wants_values:
                 print("Looking at value: ", value)
                 
@@ -93,15 +95,12 @@ class Agent:
 
         # get pairs of cards to pick from the table and discard from hand
         for want in possible_wants:
-            if verbose:
-                print("Current wanted card: ", (want.value, want.suit))
+            print("Current wanted card: ", (want.value, want.suit))
 
             # if the wanted card is on table and not already in hand
             if want in table_list:
                 # find cards that can be discarded (i.e. cards that do not occur enough times)
                 discards = [card for card in card_list if card not in possible_wants]
-                if want in card_list:
-                    discards = [card for card in card_list if card != want and card not in possible_wants]
 
                 # case 1: there are cards that can be discarded
                 if discards:
@@ -123,18 +122,15 @@ class Agent:
 
                 # case 2: there are no cards to discard
                 else:
-                    if verbose:
-                        print("Nothing to discard, current hand has wanted cards")
+                    print("Nothing to discard, current hand has wanted cards")
 
             # if the wanted card is already in hand, then do nowthing
             else:
-                if verbose:
-                    print(f"Skip {(want.value, want.suit)} since not on table")
+                print(f"Skip {(want.value, want.suit)} since not on table")
 
-            if verbose:
-                print("Cards on table: ", [(card.value, card.suit) for card in table_list])
-                print("Cards in hand: ", [(card.value, card.suit) for card in card_list])
-                print()
+            print("Cards on table: ", [(card.value, card.suit) for card in table_list])
+            print("Cards in hand: ", [(card.value, card.suit) for card in card_list])
+            print()
 
         print("End of round - cards on table: ", [(card.value, card.suit) for card in table_list])
         print("End of round - cards in hand: ", [(card.value, card.suit) for card in card_list])

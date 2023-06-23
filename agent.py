@@ -97,12 +97,13 @@ class Agent:
         # Commit to multiple frequent values if possible, otherwise commit to a single one
         num_vals = 1
 
-        while sum([pair[1] for pair in most_freq_counter.most_common(num_vals + 1)]) < 4:
+        while sum([pair[1] for pair in most_freq_counter.most_common(num_vals + 1)]) <= 4:
             num_vals += 1
 
         wanted_hand_cards_values = [pair[0] for pair in most_freq_counter.most_common(num_vals)]
         wanted_hand_cards = [card for card in all_cards if card.value in wanted_hand_cards_values]
         discards = [card for card in card_list if card not in wanted_hand_cards]
+        random.shuffle(discards)
 
         # Collect all cards that we want to collect in our hand
         for want in wanted_hand_cards:
@@ -116,7 +117,7 @@ class Agent:
                 # case 1: there are cards that can be discarded
                 if discards:
                     # randomly choose a card to discard
-                    swap = random.choice(discards)
+                    swap = discards.pop(0)
                     # swap cards from hand to table
                     idx1 = card_list.index(swap)
                     idx2 = table_list.index(want)

@@ -6,7 +6,7 @@ import random
 
 class Agent:
     """ Class that stores an agent's knowledge (the user is also an agent) """
-  
+
     def __init__(self, name, cards, table):
         # name is an identifier for the agent
         self.name = name
@@ -21,7 +21,7 @@ class Agent:
         self.kb = None
         # do_no_collect is a set recording all value of cards collected by the other players
         self.do_not_collect = set()
-        
+
     def check_kemps(self):
         """
         Check if the agent has Kemps (i.e. 4 cards with the same value)
@@ -65,7 +65,7 @@ class Agent:
 
         # most priority given to the cards which occur most frequently
         possible_wants = sorted([card for card in all_cards if all_values.count(card.value) >= most_freq],
-                                  key=operator.attrgetter('value'), reverse=True)
+                                key=operator.attrgetter('value'), reverse=True)
 
         print("Wanted cards: ", [(card.value, card.suit) for card in possible_wants])
         print("Cards on table: ", [(card.value, card.suit) for card in table_list])
@@ -79,7 +79,7 @@ class Agent:
 
             for value in possible_wants_values:
                 print("Looking at value: ", value)
-                
+
                 if value in list(self.do_not_collect):
                     print("number in do not collect: ", value)
                     possible_wants = sorted([card for card in possible_wants if card.value != value],
@@ -87,8 +87,8 @@ class Agent:
                     print("New wanted cards: ", [(card.value, card.suit) for card in possible_wants])
                     continue
 
-                if self.kb.check_players_have_number(value): 
-                    print("Both have value so removing ", value)                        
+                if self.kb.check_players_have_number(value):
+                    print("Both have value so removing ", value)
                     possible_wants = sorted([card for card in possible_wants if card.value != value],
                                             key=operator.attrgetter('value'), reverse=True)
                     print("New wanted cards: ", [(card.value, card.suit) for card in possible_wants])
@@ -100,7 +100,11 @@ class Agent:
             # if the wanted card is on table and not already in hand
             if want in table_list:
                 # find cards that can be discarded (i.e. cards that do not occur enough times)
-                discards = [card for card in card_list if card not in possible_wants]
+                # discards = [card for card in card_list if card not in possible_wants]
+                most_freq_hand = max(Counter(getattr(card, 'value') for card in card_list).values())
+                discards = []
+                if most_freq_hand < most_freq:
+                    discards = [card for card in card_list if card.value != want.value]
 
                 # case 1: there are cards that can be discarded
                 if discards:
@@ -115,7 +119,7 @@ class Agent:
                     # make public announcement
                     announcements.append(PublicAnnouncement(self, want, AnnouncementType.PICKED))
                     announcements.append(PublicAnnouncement(self, swap, AnnouncementType.DISCARDED))
-                    
+
                     # update own knowledge base
                     self.kb.set_card_knowledge_of_individual(want, self)
                     self.kb.set_discard_knowledge(swap)

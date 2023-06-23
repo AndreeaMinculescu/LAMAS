@@ -96,7 +96,6 @@ def display_text(window, text):
     :param text: the text to be displayed
     :return: None
     """
-    window.fill((15, 0, 169), ((window.get_width() // 4, window.get_height() // 2.5, window.get_width()//2, window.get_height()//4)))
     font = pygame.font.Font('freesansbold.ttf', 26)
     lines = text.splitlines()
     for i, l in enumerate(lines):

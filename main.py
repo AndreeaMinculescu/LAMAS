@@ -17,6 +17,12 @@ def init_game(deck):
     user = Agent("user", deck.deal_cards_player(), deck.table_cards)
     player2 = Agent("p2", deck.deal_cards_player(), deck.table_cards)
     player3 = Agent("p3", deck.deal_cards_player(), deck.table_cards)
+    print("user ")
+    print_arr_cards(user.cards)
+    print("player1 ")
+    print_arr_cards(player2.cards)
+    print("player2 ")
+    print_arr_cards(player3.cards)
 
     user.kb = KnowledgeBase(user, [player2, player3], deck.whole_deck)
     player2.kb = KnowledgeBase(player2, [user, player3], deck.whole_deck)
@@ -27,7 +33,7 @@ def init_game(deck):
 # initialize pygame screen
 pygame.init()
 SIZE = (1400, 800)
-window = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+window = pygame.display.set_mode(SIZE)
 # set background colour
 window.fill((15, 0, 169))
 
@@ -49,22 +55,37 @@ user, player2, player3 = init_game(deck)
 kb_greedy = False
 turn = 0
 end_game = False
+no_moves_count = 0
+deck.deal_table()
 
 while not end_game:
     # set name of pygame screen
     pygame.display.set_caption("Kemps!")
+    window.fill((15, 0, 169))
+
+    # visualize players (placeholders)
+    model_one = pygame.transform.rotate(card_back, -90)
+    window.blit(model_one, (0, window.get_height() / 2 - model_one.get_height() / 2))
+    model_two = pygame.transform.rotate(card_back, 90)
+    window.blit(model_two,
+                (window.get_width() - model_two.get_width(), window.get_height() / 2 - model_two.get_height() / 2))
+
+    # display cards and get card coordinated
+    card_coord = display_cards(window, user.cards, deck)
 
     # every three turn reset cards on table
-    if turn % 3 == 0:
+    if no_moves_count == 3:
         deck.deal_table()
         user.kb.set_knowledge_of_other_cards()
         player2.kb.set_knowledge_of_other_cards()
         player3.kb.set_knowledge_of_other_cards()
+        no_moves_count = 0
 
+    init_cards = deck.table_cards[:]
     # update knowledge base of players given new set of cards and list of discarded cards
-    user.kb.update_discard_pile(list(deck.discarded))
-    player2.kb.update_discard_pile(list(deck.discarded))
-    player3.kb.update_discard_pile(list(deck.discarded))
+    user.kb.update_discard_pile(list(deck.discarded) + deck.table_cards)
+    player2.kb.update_discard_pile(list(deck.discarded) + deck.table_cards)
+    player3.kb.update_discard_pile(list(deck.discarded) + deck.table_cards)
 
     user.table = deck.table_cards
     player2.table = deck.table_cards
@@ -91,15 +112,6 @@ while not end_game:
                 if button_turn.click(event):
                     run = False
                 button_turn.show(window)
-
-                # visualize players (placeholders)
-                model_one = pygame.transform.rotate(card_back, -90)
-                window.blit(model_one, (0, window.get_height()/2 - model_one.get_height()/2))
-                model_two = pygame.transform.rotate(card_back, 90)
-                window.blit(model_two, (window.get_width() - model_two.get_width(), window.get_height() / 2 - model_two.get_height() / 2))
-
-                # display cards and get card coordinated
-                card_coord = display_cards(window, user.cards, deck)
 
                 # handle player swap events and update cards view
                 pos = None
@@ -141,11 +153,11 @@ while not end_game:
     else:
         # decide which agent's turn it is (model 1 or 2)
         if turn % 3 == 1:
-            kb_greedy = True
+            # kb_greedy = True
             text = "Model 1 turn \n"
             player = player2
         if turn % 3 == 2:
-            kb_greedy = True
+            # kb_greedy = True
             text = "Model 2 turn \n"
             player = player3
 
@@ -195,6 +207,10 @@ while not end_game:
         time.sleep(5)
 
     # start next turn
+    if deck.table_cards == init_cards:
+        no_moves_count += 1
+    else:
+        no_moves_count = 0
     turn += 1
 
 print("User score: ", user.score)

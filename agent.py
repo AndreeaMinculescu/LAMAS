@@ -3,6 +3,7 @@ from collections import Counter
 from announcement import PublicAnnouncement, AnnouncementType
 import random
 
+OLD_PRINT = print
 
 class Agent:
     """ Class that stores an agent's knowledge (the user is also an agent) """
@@ -46,12 +47,15 @@ class Agent:
         :return: a list of announcements (i.e. agent moves)
         """
 
-        def new_print(*val):
-            nonlocal verbose
-            if verbose:
-                print(*val)
+        def freeze():
+            def new_print(*val):
+                global OLD_PRINT
+                nonlocal verbose
+                if verbose:
+                    OLD_PRINT(*val)
+            return new_print
 
-        print = new_print
+        print = freeze()
 
         card_list = self.cards
         table_list = self.table
@@ -59,12 +63,11 @@ class Agent:
 
         # find the values that appear most often
         all_cards = card_list + table_list
-        all_values = [card.value for card in all_cards]
-        most_freq = Counter(getattr(card, 'value') for card in all_cards)
-        most_freq = max(most_freq.values())
+        most_freq_counter = Counter(getattr(card, 'value') for card in all_cards)
+        most_freq = max(most_freq_counter.values())
 
         # most priority given to the cards which occur most frequently
-        possible_wants = sorted([card for card in all_cards if all_values.count(card.value) >= most_freq],
+        possible_wants = sorted([card for card in all_cards if card.value in most_freq_counter.keys()],
                                 key=operator.attrgetter('value'), reverse=True)
 
         print("Wanted cards: ", [(card.value, card.suit) for card in possible_wants])
@@ -74,7 +77,7 @@ class Agent:
 
         # if strategy kb based remove all cards in possible wants which agent thinks all other players might have
         if kb_based:
-            possible_wants_values = sorted(list(set([card.value for card in possible_wants])), reverse=True)
+            possible_wants_values = most_freq_counter.keys()
             print("No collect list: ", list(self.do_not_collect))
 
             for value in possible_wants_values:
@@ -82,29 +85,33 @@ class Agent:
 
                 if value in list(self.do_not_collect):
                     print("number in do not collect: ", value)
-                    possible_wants = sorted([card for card in possible_wants if card.value != value],
-                                            key=operator.attrgetter('value'), reverse=True)
+                    _ = most_freq_counter.pop(value)
                     print("New wanted cards: ", [(card.value, card.suit) for card in possible_wants])
                     continue
 
                 if self.kb.check_players_have_number(value):
                     print("Both have value so removing ", value)
-                    possible_wants = sorted([card for card in possible_wants if card.value != value],
-                                            key=operator.attrgetter('value'), reverse=True)
+                    _ = most_freq_counter.pop(value)
                     print("New wanted cards: ", [(card.value, card.suit) for card in possible_wants])
 
-        # get pairs of cards to pick from the table and discard from hand
-        for want in possible_wants:
+        # Commit to multiple frequent values if possible, otherwise commit to a single one
+        num_vals = 1
+
+        while sum([pair[1] for pair in most_freq_counter.most_common(num_vals + 1)]) < 4:
+            num_vals += 1
+
+        wanted_hand_cards_values = [pair[0] for pair in most_freq_counter.most_common(num_vals)]
+        wanted_hand_cards = [card for card in all_cards if card.value in wanted_hand_cards_values]
+        discards = [card for card in card_list if card not in wanted_hand_cards]
+
+        # Collect all cards that we want to collect in our hand
+        for want in wanted_hand_cards:
             print("Current wanted card: ", (want.value, want.suit))
 
             # if the wanted card is on table and not already in hand
             if want in table_list:
                 # find cards that can be discarded (i.e. cards that do not occur enough times)
                 # discards = [card for card in card_list if card not in possible_wants]
-                most_freq_hand = max(Counter(getattr(card, 'value') for card in card_list).values())
-                discards = []
-                if most_freq_hand < most_freq:
-                    discards = [card for card in card_list if card.value != want.value]
 
                 # case 1: there are cards that can be discarded
                 if discards:

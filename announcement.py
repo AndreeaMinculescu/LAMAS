@@ -17,7 +17,7 @@ class PublicAnnouncement:
         # type is the type of the public announcement (a card can be picked, discarded or used for Kemps)
         self.type = announcement_type
 
-        print(f"Public Announcement: {self.sender.name} has {self.type.name} {(card.value, card.suit)}")
+        # print(f"Public Announcement: {self.sender.name} has {self.type.name} {(card.value, card.suit)}")
 
 
 def make_announcements(announcements, players):

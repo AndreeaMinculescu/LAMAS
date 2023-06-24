@@ -1,7 +1,7 @@
 from enum import Enum
 import random
 import pygame
-random.seed(40)
+# random.seed(40)
 
 
 class Suits(Enum):

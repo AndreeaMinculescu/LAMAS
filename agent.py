@@ -35,7 +35,7 @@ class Agent:
             return 1
         return 0
 
-    def greedy_strategy(self, verbose=False, kb_based=False):
+    def greedy_strategy(self, verbose=False, kb_based=False, blocking=False):
         """
         Find all common numbers (most occurances) in all the cards visible to the agent (their cards and the cards on
         table) and then pick up the same number from the pile on the table otherwise don't do anything. While
@@ -64,7 +64,6 @@ class Agent:
         # find the values that appear most often
         all_cards = card_list + table_list
         most_freq_counter = Counter(getattr(card, 'value') for card in all_cards)
-        most_freq = max(most_freq_counter.values())
 
         # most priority given to the cards which occur most frequently
         possible_wants = sorted([card for card in all_cards if card.value in most_freq_counter.keys()],
@@ -77,7 +76,7 @@ class Agent:
 
         # if strategy kb based remove all cards in possible wants which agent thinks all other players might have
         if kb_based:
-            possible_wants_values = most_freq_counter.keys()
+            possible_wants_values = [val for val in most_freq_counter.keys()]
             print("No collect list: ", list(self.do_not_collect))
 
             for value in possible_wants_values:
@@ -94,10 +93,15 @@ class Agent:
                     _ = most_freq_counter.pop(value)
                     print("New wanted cards: ", [(card.value, card.suit) for card in possible_wants])
 
+
+        if not most_freq_counter:
+            return announcements
+
         # Commit to multiple frequent values if possible, otherwise commit to a single one
         num_vals = 1
 
-        while sum([pair[1] for pair in most_freq_counter.most_common(num_vals + 1)]) <= 4:
+        while sum([pair[1] for pair in most_freq_counter.most_common(num_vals + 1)]) <= 4 \
+                and num_vals < len(most_freq_counter):
             num_vals += 1
 
         wanted_hand_cards_values = [pair[0] for pair in most_freq_counter.most_common(num_vals)]
@@ -144,6 +148,50 @@ class Agent:
             print("Cards in hand: ", [(card.value, card.suit) for card in card_list])
             print()
 
+        if not blocking:
+            print("End of round - cards on table: ", [(card.value, card.suit) for card in table_list])
+            print("End of round - cards in hand: ", [(card.value, card.suit) for card in card_list])
+            # update card list
+            self.cards = card_list
+            self.table = table_list
+            return announcements
+
+        other_players_wants = [card for card in all_cards if (self.kb.check_players_have_number(card)
+                               or card.value in list(self.do_not_collect))
+                               and card not in wanted_hand_cards]
+
+        while discards and other_players_wants:
+            to_discard = discards.pop(0)
+
+            print("Looking to discard: ", (to_discard.value, to_discard.suit))
+
+            if to_discard in other_players_wants:
+                print((to_discard.value, to_discard.suit), " this card already blocks someone, so we keep it.")
+                _ = other_players_wants.pop(other_players_wants.index(to_discard))
+                continue
+
+            else:
+                to_block = other_players_wants.pop(0)
+                print("Looking to block: ", (to_block.value, to_block.suit))
+
+                # swap cards from hand to table
+                idx1 = card_list.index(to_discard)
+                idx2 = table_list.index(to_block)
+                card_list[idx1] = to_block
+                table_list[idx2] = to_discard
+
+                # make public announcement
+                announcements.append(PublicAnnouncement(self, to_block, AnnouncementType.PICKED))
+                announcements.append(PublicAnnouncement(self, to_discard, AnnouncementType.DISCARDED))
+
+                # update own knowledge base
+                self.kb.set_card_knowledge_of_individual(to_block, self)
+                self.kb.set_discard_knowledge(to_discard)
+
+            print("Cards on table: ", [(card.value, card.suit) for card in table_list])
+            print("Cards in hand: ", [(card.value, card.suit) for card in card_list])
+            print()
+
         print("End of round - cards on table: ", [(card.value, card.suit) for card in table_list])
         print("End of round - cards in hand: ", [(card.value, card.suit) for card in card_list])
         # update card list
@@ -151,6 +199,7 @@ class Agent:
         self.table = table_list
 
         return announcements
+
 
     def recieve_announcement(self, announcement):
         """

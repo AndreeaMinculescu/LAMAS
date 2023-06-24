@@ -34,9 +34,10 @@ p1_score = []
 p2_score = []
 p3_score = []
 kb_greedy = False
+blocking = False
 no_moves_count = 0
 
-for _ in range(1):
+for _ in range(100):
     print("\n############### NEW GAME ####################")
     player1, player2, player3, deck = init_game()
     turn = 0
@@ -65,17 +66,19 @@ for _ in range(1):
             player = player1
             # kb_greedy = True
             print("player 1 turn")
+            announcements = player.greedy_strategy(verbose=False, kb_based=kb_greedy, blocking=True)
         if turn % 3 == 1:
+            player = player2
             # kb_greedy = True
             print("player 2 turn")
-            player = player2
+            announcements = player.greedy_strategy(verbose=False, kb_based=kb_greedy, blocking=blocking)
         if turn % 3 == 2:
             # kb_greedy = True
             print("player 3 turn")
             player = player3
+            announcements = player.greedy_strategy(verbose=False, kb_based=kb_greedy, blocking=True)
 
         print("discard pile: ", [(card.value, card.suit) for card in list(deck.discarded)])
-        announcements = player.greedy_strategy(verbose=True, kb_based=kb_greedy)
         make_announcements(announcements, [player1, player2, player3])
 
         # update points

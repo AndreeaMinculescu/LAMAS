@@ -159,18 +159,18 @@ class Agent:
                                and card not in wanted_hand_cards]
 
         while discards and other_players_wants:
-            to_discard = discards.pop(0)
+            to_block = other_players_wants.pop(0)
 
-            print("Looking to discard: ", print_arr_cards([to_discard]))
+            print("Looking to block: ", print_arr_cards([to_block]))
 
-            if to_discard in other_players_wants:
-                print(print_arr_cards([to_discard]), " this card already blocks someone, so we keep it.")
-                _ = other_players_wants.pop(other_players_wants.index(to_discard))
+            if to_block in card_list:
+                print(print_arr_cards([to_block]), " this card already blocks someone, so we keep it.")
+                _ = discards.pop(discards.index(to_block))
                 continue
 
             else:
-                to_block = other_players_wants.pop(0)
-                print("Looking to block: ", print_arr_cards(to_block))
+                to_discard = discards.pop(0)
+                print("Looking to discard: ", print_arr_cards([to_discard]))
 
                 # swap cards from hand to table
                 idx1 = card_list.index(to_discard)

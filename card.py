@@ -46,7 +46,7 @@ class Deck:
         # cards + discarded + table_cards make up a full deck of cards (all 52 cards)
         self.table_cards = []
         for suit in Suits:
-            for value in range(2, 9):
+            for value in range(1, 14):
                 self.cards.append(Card(suit, value))
         # all cards in a full deck (all 52 cards)
         self.whole_deck = self.cards[:]

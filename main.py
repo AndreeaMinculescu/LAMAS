@@ -51,8 +51,8 @@ no_moves_count = 0
 
 # initialize pygame screen
 pygame.init()
-SIZE = (1400, 800)
-window = pygame.display.set_mode(SIZE)
+# SIZE = (1400, 800)
+window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 # set background colour
 window.fill((15, 0, 169))
 

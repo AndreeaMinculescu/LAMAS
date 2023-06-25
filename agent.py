@@ -9,7 +9,7 @@ OLD_PRINT = print
 class Agent:
     """ Class that stores an agent's knowledge (the user is also an agent) """
 
-    def __init__(self, name, cards, table):
+    def __init__(self, name, cards, table, kb_greedy=False, blocking=False):
         # name is an identifier for the agent
         self.name = name
         # cards is a list of 4 card objects (cards in the agent's hand)
@@ -23,6 +23,10 @@ class Agent:
         self.kb = None
         # do_no_collect is a set recording all value of cards collected by the other players
         self.do_not_collect = set()
+        # set type of agent
+        self.kb_greedy = kb_greedy
+        self.blocking = blocking
+
 
     def check_kemps(self):
         """

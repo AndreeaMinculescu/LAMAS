@@ -1,5 +1,6 @@
 import pygame
 import ptext
+from card import print_arr_cards
 
 class Button:
     """Initialize a button"""
@@ -51,7 +52,7 @@ def display_cards(window, play_cards, deck, only_table=False):
     return card_coord
 
 
-def swap_cards(first_card, card_coord, mouse_pos, play_cards, deck):
+def swap_cards(first_card, card_coord, mouse_pos, play_cards, deck, window):
     """
     Handle swap events: update the user cards and the table cards after performing the swap
     :param first_card: card that was clicked first (if None, then the current click is the first)
@@ -67,9 +68,11 @@ def swap_cards(first_card, card_coord, mouse_pos, play_cards, deck):
         if mouse_pos is not None and rect_coord.collidepoint(mouse_pos):
             if first_card is None:
                 first_card = card
+                pygame.draw.rect(window, (255,255,0), (rect_coord[0]-5, rect_coord[1]+5, rect_coord[2], rect_coord[3]))
             else:
                 if not ((first_card in deck.table_cards and card in deck.table_cards) or
                         (first_card in play_cards and card in play_cards)):
+                    window.fill((15, 0, 169))
                     temp_table_cards = deck.table_cards[:]
                     if card in temp_table_cards:
                         deck.table_cards[deck.table_cards.index(card)] = first_card
@@ -82,7 +85,6 @@ def swap_cards(first_card, card_coord, mouse_pos, play_cards, deck):
                         play_cards[play_cards.index(first_card)] = card
                     flag = True
                     swap = card
-
     if flag:
         return None, play_cards, first_card, swap
     else:

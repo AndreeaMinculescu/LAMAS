@@ -40,10 +40,13 @@ kb_greedy = False
 blocking = False
 no_moves_count = 0
 
-for config in [[[True, True], [True, True], [True, True], "KB Blocking"],
-               [[True, False], [False, False], [False, False], "1 KB Greedy vs 2 Greedy"],
-               [[True, True], [False, False], [False, False], "1 KB Blocking vs 2 Greedy"],
-               [[True, True], [True, False], [True, False], "1 KB Blocking vs 2 KB Greedy"]]:
+for config in [[[True, False], [True, False], [False, False], "2 KB Greedy vs 1 Greedy"],
+               [[True, True], [True, True], [False, False], "2 KB Blocking vs 1 Greedy"],
+               [[True, True], [True, True], [True, False], "2 KB Blocking vs 1 KB Greedy"]]:
+
+    p1_score = []
+    p2_score = []
+    p3_score = []
 
     for seed in [123, 222, 666, 42, 27, 35, 49]:
         random.seed(seed)

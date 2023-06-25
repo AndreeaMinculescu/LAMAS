@@ -170,7 +170,7 @@ class KnowledgeBase:
         for c, kb in self.knowledge.items():
             if c[1] == value:
                 # ... if another player has value
-                print(f"{c}: {kb}")
+                # print(f"{c}: {kb}")
                 p1 = kb[self.other_players[0].name]
                 p2 = kb[self.other_players[1].name]
 

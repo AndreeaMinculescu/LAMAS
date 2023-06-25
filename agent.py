@@ -2,6 +2,7 @@ import operator
 from collections import Counter
 from announcement import PublicAnnouncement, AnnouncementType
 import random
+from card import print_arr_cards
 
 OLD_PRINT = print
 
@@ -69,9 +70,9 @@ class Agent:
         possible_wants = sorted([card for card in all_cards if card.value in most_freq_counter.keys()],
                                 key=operator.attrgetter('value'), reverse=True)
 
-        print("Wanted cards: ", [(card.value, card.suit) for card in possible_wants])
-        print("Cards on table: ", [(card.value, card.suit) for card in table_list])
-        print("Cards in hand: ", [(card.value, card.suit) for card in card_list])
+        print("Wanted cards: ", print_arr_cards(possible_wants))
+        print("Cards on table: ", print_arr_cards(table_list))
+        print("Cards in hand: ", print_arr_cards(card_list))
         print("------------------------------------")
 
         # if strategy kb based remove all cards in possible wants which agent thinks all other players might have
@@ -85,14 +86,11 @@ class Agent:
                 if value in list(self.do_not_collect):
                     print("number in do not collect: ", value)
                     _ = most_freq_counter.pop(value)
-                    print("New wanted cards: ", [(card.value, card.suit) for card in possible_wants])
                     continue
 
                 if self.kb.check_players_have_number(value):
-                    print("Both have value so removing ", value)
+                    print("Other players may have value so removing ", value)
                     _ = most_freq_counter.pop(value)
-                    print("New wanted cards: ", [(card.value, card.suit) for card in possible_wants])
-
 
         if not most_freq_counter:
             return announcements
@@ -111,7 +109,7 @@ class Agent:
 
         # Collect all cards that we want to collect in our hand
         for want in wanted_hand_cards:
-            print("Current wanted card: ", (want.value, want.suit))
+            print("Current wanted card: ", print_arr_cards([want]))
 
             # if the wanted card is on table and not already in hand
             if want in table_list:
@@ -142,15 +140,15 @@ class Agent:
 
             # if the wanted card is already in hand, then do nowthing
             else:
-                print(f"Skip {(want.value, want.suit)} since not on table")
+                print(f"Skip {print_arr_cards([want])} since not on table")
 
-            print("Cards on table: ", [(card.value, card.suit) for card in table_list])
-            print("Cards in hand: ", [(card.value, card.suit) for card in card_list])
+            print("Cards on table: ", print_arr_cards(table_list))
+            print("Cards in hand: ", print_arr_cards(card_list))
             print()
 
         if not blocking:
-            print("End of round - cards on table: ", [(card.value, card.suit) for card in table_list])
-            print("End of round - cards in hand: ", [(card.value, card.suit) for card in card_list])
+            print("End of round - cards on table: ", print_arr_cards(table_list))
+            print("End of round - cards in hand: ", print_arr_cards(card_list))
             # update card list
             self.cards = card_list
             self.table = table_list
@@ -163,16 +161,16 @@ class Agent:
         while discards and other_players_wants:
             to_discard = discards.pop(0)
 
-            print("Looking to discard: ", (to_discard.value, to_discard.suit))
+            print("Looking to discard: ", print_arr_cards([to_discard]))
 
             if to_discard in other_players_wants:
-                print((to_discard.value, to_discard.suit), " this card already blocks someone, so we keep it.")
+                print(print_arr_cards([to_discard]), " this card already blocks someone, so we keep it.")
                 _ = other_players_wants.pop(other_players_wants.index(to_discard))
                 continue
 
             else:
                 to_block = other_players_wants.pop(0)
-                print("Looking to block: ", (to_block.value, to_block.suit))
+                print("Looking to block: ", print_arr_cards(to_block))
 
                 # swap cards from hand to table
                 idx1 = card_list.index(to_discard)
@@ -188,12 +186,12 @@ class Agent:
                 self.kb.set_card_knowledge_of_individual(to_block, self)
                 self.kb.set_discard_knowledge(to_discard)
 
-            print("Cards on table: ", [(card.value, card.suit) for card in table_list])
-            print("Cards in hand: ", [(card.value, card.suit) for card in card_list])
+            print("Cards on table: ", print_arr_cards(table_list))
+            print("Cards in hand: ", print_arr_cards(card_list))
             print()
 
-        print("End of round - cards on table: ", [(card.value, card.suit) for card in table_list])
-        print("End of round - cards in hand: ", [(card.value, card.suit) for card in card_list])
+        print("End of round - cards on table: ", print_arr_cards(table_list))
+        print("End of round - cards in hand: ", print_arr_cards(card_list))
         # update card list
         self.cards = card_list
         self.table = table_list
@@ -212,7 +210,6 @@ class Agent:
         t = announcement.type
         sender = announcement.sender
         card = announcement.card
-
         # sender picked the card so no one else has it
         if t == AnnouncementType.PICKED:
             self.do_not_collect.add(card.value)

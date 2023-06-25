@@ -7,27 +7,24 @@ from announcement import PublicAnnouncement, AnnouncementType, make_announcement
 import time
 
 
-def init_game(deck):
+def init_game():
     """
     Initialize agents and knowledge bases
     :param deck: deck of cards
     :return: the three players (user included)
     """
+    # initialize deck of cards
+    deck = Deck()
+    deck.deal_table()
 
     user = Agent("user", deck.deal_cards_player(), deck.table_cards)
     player2 = Agent("p2", deck.deal_cards_player(), deck.table_cards)
     player3 = Agent("p3", deck.deal_cards_player(), deck.table_cards)
-    print("user ")
-    print_arr_cards(user.cards)
-    print("player1 ")
-    print_arr_cards(player2.cards)
-    print("player2 ")
-    print_arr_cards(player3.cards)
 
     user.kb = KnowledgeBase(user, [player2, player3], deck.whole_deck)
     player2.kb = KnowledgeBase(player2, [user, player3], deck.whole_deck)
     player3.kb = KnowledgeBase(player3, [user, player2], deck.whole_deck)
-    return user, player2, player3
+    return user, player2, player3, deck
 
 
 # initialize pygame screen
@@ -37,8 +34,12 @@ window = pygame.display.set_mode(SIZE)
 # set background colour
 window.fill((15, 0, 169))
 
-# initialize deck of cards
-deck = Deck()
+# initialize players and game
+user, player2, player3, deck = init_game()
+kb_greedy = False
+turn = 0
+end_game = False
+no_moves_count = 0
 
 # for swap events
 first_card = None
@@ -49,14 +50,6 @@ card_back = pygame.transform.scale(card_back, (deck.cards[0].image.get_width(), 
 
 # initialize "Next turn" button (for user)
 button_turn = Button("Next turn", (10, card_back.get_height()/2), font=30)
-
-# initialize players and game
-user, player2, player3 = init_game(deck)
-kb_greedy = False
-turn = 0
-end_game = False
-no_moves_count = 0
-deck.deal_table()
 
 while not end_game:
     # set name of pygame screen
@@ -95,6 +88,7 @@ while not end_game:
 
     # handle user's turn
     if turn % 3 == 0:
+        print("\n   NEXT TURN: user turn")
         run = True
         while run:
             for event in pygame.event.get():
@@ -142,12 +136,12 @@ while not end_game:
                         end_game = True
                     run = False
 
-                # update all agent kbs
-                make_announcements(announcements, [user, player2, player3])
-
                 # update game
                 display_text(window, "Your turn")
                 pygame.display.update()
+
+        # update all agent kbs
+        make_announcements(announcements, [user, player2, player3])
 
     # handle models' turn
     else:
@@ -155,10 +149,12 @@ while not end_game:
         if turn % 3 == 1:
             # kb_greedy = True
             text = "Model 1 turn \n"
+            print("\n   NEXT TURN: model 1 turn")
             player = player2
         if turn % 3 == 2:
             # kb_greedy = True
             text = "Model 2 turn \n"
+            print("\n   NEXT TURN: model 2 turn")
             player = player3
 
         # update table card view (before any moves made)
@@ -170,7 +166,7 @@ while not end_game:
         time.sleep(3)
 
         # run greedy strategy
-        announcements = player.greedy_strategy(verbose=False, kb_based=kb_greedy)
+        announcements = player.greedy_strategy(verbose=True, kb_based=kb_greedy)
 
         # check Kemps and create public announcement
         if player.check_kemps():
@@ -191,7 +187,6 @@ while not end_game:
         # display text to user regarding agents' actions (for readibility)
         if announcements:
             for ann in announcements:
-                print(ann.type)
                 if ann.type == AnnouncementType.PICKED:
                     text += f"Model picked card <{ann.card.value}, {ann.card.suit.name}> \n"
                 elif ann.type == AnnouncementType.DISCARDED:

@@ -33,7 +33,7 @@ class Card:
         return f'<{self.value}{self.lookup[self.suit]}>'
 
 def print_arr_cards(arr_cards):
-    print([(card.value, card.lookup[card.suit]) for card in arr_cards])
+    return [(str(card.value) + card.lookup[card.suit]) for card in arr_cards]
 
 class Deck:
     """ Class that records information regarding a deck of cards """
@@ -46,7 +46,7 @@ class Deck:
         # cards + discarded + table_cards make up a full deck of cards (all 52 cards)
         self.table_cards = []
         for suit in Suits:
-            for value in range(2, 7):
+            for value in range(2, 9):
                 self.cards.append(Card(suit, value))
         # all cards in a full deck (all 52 cards)
         self.whole_deck = self.cards[:]

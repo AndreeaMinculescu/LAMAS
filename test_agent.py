@@ -1,21 +1,11 @@
 from agent import Agent
-from card import Deck, print_arr_cards
+from card import Deck, print_arr_cards, Card, Suits
 from knowledge_base import KnowledgeBase
-from announcement import PublicAnnouncement, AnnouncementType
+from announcement import PublicAnnouncement, AnnouncementType, make_announcements
 from statistics import mean
 import random
 
 ############ Testing environment, not part of the main pipeline #####################
-def make_announcements(announcements, players):
-    for announcement in announcements:
-        sender = announcement.sender
-        for player in players:
-            if player.name != sender.name:
-                # print(f"KB of {player.name} before announcement({announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}): {player.kb}")
-                # print(f"Player {player.name} recieved announcement: {announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}")
-                player.recieve_announcement(announcement)
-                # print(f"KB of {player.name} after announcement({announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}): {player.kb}")
-
 
 def init_game():
     deck = Deck()
@@ -34,15 +24,16 @@ def init_game():
 p1_score = []
 p2_score = []
 p3_score = []
-kb_greedy = False
-blocking = False
+kb_greedy = True
+blocking = True
+verbose = True
 no_moves_count = 0
 
+# for seed in [123, 222, 666, 42, 27, 35, 49]:
+for seed in [1]:
+    # random.seed(seed)
 
-for seed in [123, 222, 666, 42, 27, 35, 49]:
-    random.seed(seed)
-
-    for _ in range(1000):
+    for _ in range(1):
         print(f"\n############### NEW GAME: {seed}: {_} ####################")
         player1, player2, player3, deck = init_game()
         turn = 0
@@ -70,18 +61,18 @@ for seed in [123, 222, 666, 42, 27, 35, 49]:
             if turn % 3 == 0:
                 player = player1
                 # kb_greedy = True
-                print("player 1 turn")
-                announcements = player.greedy_strategy(verbose=False, kb_based=kb_greedy, blocking=True)
+                print("\n   NEXT TURN: player 1 turn")
+                announcements = player.greedy_strategy(verbose=verbose, kb_based=kb_greedy, blocking=blocking)
             if turn % 3 == 1:
                 player = player2
                 # kb_greedy = True
-                print("player 2 turn")
-                announcements = player.greedy_strategy(verbose=False, kb_based=kb_greedy, blocking=blocking)
+                print("\n   NEXT TURN: player 2 turn")
+                announcements = player.greedy_strategy(verbose=verbose, kb_based=kb_greedy, blocking=blocking)
             if turn % 3 == 2:
                 # kb_greedy = True
-                print("player 3 turn")
+                print("\n   NEXT TURN player 3 turn")
                 player = player3
-                announcements = player.greedy_strategy(verbose=False, kb_based=kb_greedy, blocking=True)
+                announcements = player.greedy_strategy(verbose=verbose, kb_based=kb_greedy, blocking=blocking)
 
             # print("discard pile: ", [(card.value, card.suit) for card in list(deck.discarded)])
             make_announcements(announcements, [player1, player2, player3])
@@ -97,8 +88,6 @@ for seed in [123, 222, 666, 42, 27, 35, 49]:
                 else:
                     break
 
-            # print("discard pile: ", [(card.value, card.suit) for card in list(deck.discarded)])
-
             if deck.table_cards == init_cards:
                 no_moves_count += 1
             else:
@@ -109,6 +98,7 @@ for seed in [123, 222, 666, 42, 27, 35, 49]:
         p2_score.append(player2.score)
         p3_score.append(player3.score)
 
+print()
 print("Player 1 score: ", sum(p1_score))
 print("Player 2 score: ", sum(p2_score))
 print("Player 3 score: ", sum(p3_score))

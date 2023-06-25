@@ -28,6 +28,7 @@ def make_announcements(announcements, players):
     :return: None
     """
     for announcement in announcements:
+        print(f"Public announcement: {announcement.sender.name} {announcement.type.name} {announcement.card}")
         sender = announcement.sender
         for player in players:
             if player.name != sender.name:

@@ -24,15 +24,23 @@ def init_game():
     user.kb = KnowledgeBase(user, [player2, player3], deck.whole_deck)
     player2.kb = KnowledgeBase(player2, [user, player3], deck.whole_deck)
     player3.kb = KnowledgeBase(player3, [user, player2], deck.whole_deck)
+
+    type_player2 = input('What kind of agent should model 1 be? (options: GREEDY, KB-GREEDY, KB-BLOCKING; default GREEDY) ')
+    type_player3 = input('What kind of agent should model 2 be? (options: GREEDY, KB-GREEDY, KB-BLOCKING; default GREEDY) ')
+
+    if type_player2.lower() == "KB-GREEDY".lower():
+        player2.kb_greedy = True
+    if type_player2.lower() == "KB-BLOCKING".lower():
+        player2.blocking = True
+        player2.kb_greedy = True
+
+    if type_player3.lower() == "KB-GREEDY".lower():
+        player3.kb_greedy = True
+    if type_player3.lower() == "KB-BLOCKING".lower():
+        player3.blocking = True
+        player3.kb_greedy = True
+
     return user, player2, player3, deck
-
-
-# initialize pygame screen
-pygame.init()
-SIZE = (1400, 800)
-window = pygame.display.set_mode(SIZE)
-# set background colour
-window.fill((15, 0, 169))
 
 # initialize players and game
 user, player2, player3, deck = init_game()
@@ -40,6 +48,13 @@ kb_greedy = False
 turn = 0
 end_game = False
 no_moves_count = 0
+
+# initialize pygame screen
+pygame.init()
+SIZE = (1400, 800)
+window = pygame.display.set_mode(SIZE)
+# set background colour
+window.fill((15, 0, 169))
 
 # for swap events
 first_card = None
@@ -102,19 +117,28 @@ while not end_game:
                         run = False
                         end_game = True
 
-                # handle next turn
-                if button_turn.click(event):
-                    run = False
-                button_turn.show(window)
-
                 # handle player swap events and update cards view
                 pos = None
                 if event.type == pygame.MOUSEBUTTONUP:
                     pos = pygame.mouse.get_pos()
                 initial_cards = user.cards
                 initial_table = deck.table_cards
-                first_card, user.cards, first_swap, second_swap = swap_cards(first_card, card_coord, pos, user.cards, deck)
-                _ = display_cards(window, user.cards, deck)
+                first_card, user.cards, first_swap, second_swap = swap_cards(first_card, card_coord, pos,
+                                                                                     user.cards, deck, window)
+                # handle next turn
+                if button_turn.click(event):
+                    run = False
+                button_turn.show(window)
+
+                model_one = pygame.transform.rotate(card_back, -90)
+                window.blit(model_one, (0, window.get_height() / 2 - model_one.get_height() / 2))
+                model_two = pygame.transform.rotate(card_back, 90)
+                window.blit(model_two,
+                            (window.get_width() - model_two.get_width(),
+                             window.get_height() / 2 - model_two.get_height() / 2))
+
+
+                card_coord = display_cards(window, user.cards, deck)
 
                 # create public announcements for swap events (to update agents' kbs)
                 if first_swap:
@@ -137,7 +161,10 @@ while not end_game:
                     run = False
 
                 # update game
-                display_text(window, "Your turn")
+                display_text(window, " Your turn \n The top cards are table cards (can be seen by all players) \n and "
+                                     "the bottom cards are your cards \n Select one table card and one hand card to "
+                                     "swap them \n Click on Next turn to end your turn \n Goal: get four cards with the "
+                                     "same number \n ESC to exit game.")
                 pygame.display.update()
 
         # update all agent kbs
@@ -166,7 +193,7 @@ while not end_game:
         time.sleep(3)
 
         # run greedy strategy
-        announcements = player.greedy_strategy(verbose=True, kb_based=kb_greedy)
+        announcements = player.greedy_strategy(verbose=True, kb_based=player.kb_greedy, blocking=player.blocking)
 
         # check Kemps and create public announcement
         if player.check_kemps():

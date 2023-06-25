@@ -1,22 +1,12 @@
 from agent import Agent
 from card import Deck, print_arr_cards
 from knowledge_base import KnowledgeBase
-from announcement import PublicAnnouncement, AnnouncementType
+from announcement import PublicAnnouncement, AnnouncementType, make_announcements
 from statistics import mean
 import random
 import pickle
 
 ############ Testing environment, not part of the main pipeline #####################
-def make_announcements(announcements, players):
-    for announcement in announcements:
-        sender = announcement.sender
-        for player in players:
-            if player.name != sender.name:
-                # print(f"KB of {player.name} before announcement({announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}): {player.kb}")
-                # print(f"Player {player.name} recieved announcement: {announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}")
-                player.recieve_announcement(announcement)
-                # print(f"KB of {player.name} after announcement({announcement.sender.name} has {announcement.type.name} {(announcement.card.value, announcement.card.suit)}): {player.kb}")
-
 
 def init_game():
     deck = Deck()
